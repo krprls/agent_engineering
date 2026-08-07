@@ -1,0 +1,27 @@
+scenario_name: insufficient_evidence
+description: Target account missing decisive fields (unknown industry, unknown employee count, unknown region).
+
+objective: Evaluate Stealth Dynamics for WidgetWare SDR assessment.
+
+account:
+  id: acc_303
+  name: Stealth Dynamics Labs
+  industry: unknown
+  employee_count: null
+  region: unknown
+  website: https://stealthdynamics.example.com
+  notes: Minimal public details available; unverified inbound form submission.
+
+evidence:
+  - claim: Stealth Dynamics registered a domain in 2026.
+    classification: verified_fact
+    source:
+      name: WHOIS Lookup
+      url: https://whois.example.com/stealthdynamics
+      retrieved_at: "2026-08-04"
+    excerpt: Domain stealthdynamics.example.com registered on 2026-01-15.
+
+state:
+  current_step: initial_assessment
+  prior_decisions: []
+  approval_status: escalated_missing_info

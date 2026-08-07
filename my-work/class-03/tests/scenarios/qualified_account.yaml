@@ -1,0 +1,35 @@
+scenario_name: qualified_account
+description: Target account meeting all ICP fit criteria and demonstrating active plant modernization buying signal.
+
+objective: Evaluate Apex Manufacturing for Plant Operations Platform fit and readiness.
+
+account:
+  id: acc_101
+  name: Apex Manufacturing Systems
+  industry: Manufacturing
+  employee_count: 1200
+  region: North America
+  website: https://apex-mfg.example.com
+  notes: Account expressed interest in unifying multi-factory telemetry across 4 plants.
+
+evidence:
+  - claim: Apex Manufacturing announced a 3-year smart plant modernization program.
+    classification: verified_fact
+    source:
+      name: Apex Press Release
+      url: https://apex-mfg.example.com/news/modernization
+      retrieved_at: "2026-08-01"
+    excerpt: Apex Manufacturing is investing in enterprise smart plant software to connect PLC hardware across 4 facilities.
+
+  - claim: Apex is actively hiring a Director of Industrial Automation.
+    classification: verified_fact
+    source:
+      name: Corporate Careers Portal
+      url: https://apex-mfg.example.com/careers/job-402
+      retrieved_at: "2026-08-03"
+    excerpt: Seeking an experienced automation leader to overhaul plant telemetry and SCADA integration.
+
+state:
+  current_step: initial_assessment
+  prior_decisions: []
+  approval_status: pending_human_review

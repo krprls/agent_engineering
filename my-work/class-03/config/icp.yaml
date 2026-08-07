@@ -1,0 +1,28 @@
+fit_criteria:
+  min_company_size: 250
+  preferred_industries:
+    - Manufacturing
+    - Industrial Automation
+    - Automotive Manufacturing
+    - Process Manufacturing
+  excluded_industries:
+    - Retail
+    - Financial Services
+    - Consumer Software
+    - Hospitality
+  preferred_regions:
+    - North America
+    - Western Europe
+
+readiness_signals:
+  buying_signals:
+    - Plant modernization initiative announcement
+    - Active recruitment for Industrial Automation Engineers or Smart Factory Leaders
+    - Major MES or ERP upgrade project in progress
+    - Public ESG or energy efficiency mandate for production facilities
+
+required_account_fields:
+  - name
+  - industry
+  - employee_count
+  - region

@@ -1,0 +1,27 @@
+scenario_name: unqualified_account
+description: Target account in an excluded industry and below the minimum employee size threshold.
+
+objective: Assess Retail QuickMart for WidgetWare solution fit.
+
+account:
+  id: acc_202
+  name: Retail QuickMart Inc
+  industry: Retail
+  employee_count: 45
+  region: North America
+  website: https://quickmart.example.com
+  notes: Small retail chain inquiring about inventory management software.
+
+evidence:
+  - claim: Retail QuickMart operates 12 convenience stores with 45 total retail staff.
+    classification: verified_fact
+    source:
+      name: Company Public Registry
+      url: https://registry.example.com/quickmart
+      retrieved_at: "2026-08-02"
+    excerpt: Retail QuickMart is a retail chain specializing in urban convenience storefronts.
+
+state:
+  current_step: initial_assessment
+  prior_decisions: []
+  approval_status: not_applicable
