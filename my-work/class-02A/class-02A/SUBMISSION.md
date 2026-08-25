@@ -1,68 +1,97 @@
-# Student Submission
+# Class 02A Submission
 
-Name: AI Agent Engineer  
-Date: 2026-08-21  
-Commit hash: pending  
+## Student
+- Name: AI Agent Engineer
+- GitHub: https://github.com/krprls/agent_engineering
+- Branch / commit: main
 
-## 1. Baseline observations
+---
 
-What was visible at L1?
+# Baseline observations
 
-> At L1, the agent only received the skill's name (`renewal-advisor`) and description from the `SKILL.md` YAML frontmatter. Initially, the description was a placeholder (`TODO - replace this with accurate L1 routing metadata without policy details.`). This indicated the existence of the `renewal-advisor` skill but provided zero domain guidance or boundary definitions for routing decisions.
+## L1
+At L1, the agent receives only the skill name (`renewal-advisor`) and description from the `SKILL.md` YAML frontmatter. Prior to engineering, the description was a generic placeholder string, which indicated that a skill existed but provided zero domain guidance or boundary definitions for routing decisions.
 
-What weaknesses did you observe before completing `SKILL.md`?
+## L2
+Before completing `SKILL.md`, all L2 instruction sections contained unfinished placeholder markers. As a result:
+1. The agent lacked systematic procedures for progressive disclosure and selective resource loading.
+2. The agent had no explicit references to exact L3 file paths (`references/discount-policy.md`, etc.), leading to path guessing or ungrounded answers.
+3. No citation rules or strict status state terminology (**requested**, **routed**, **approved**) were enforced.
+4. The agent lacked clear safety refusal boundaries for unsupported compliance questions.
 
-> Before completing `SKILL.md`, all L2 instruction sections contained `TODO` markers. As a result:
-> 1. The agent lacked systematic procedures for progressive disclosure and selective resource loading.
-> 2. The agent had no explicit references to exact L3 file paths (`references/discount-policy.md`, etc.), leading to path guessing or ungrounded answers.
-> 3. No citation rules or strict status state terminology (**requested**, **routed**, **approved**) were enforced.
-> 4. The agent lacked clear safety refusal boundaries for unsupported compliance questions (such as SOC 2 control IDs or 24-hr recovery guarantees).
+## L3
+Without explicit L2 resource routing instructions, the agent either failed to load the necessary L3 references or loaded extraneous files. Selective disclosure requires L2 to map intent directly to exact L3 file paths so that only the minimal required evidence or script is loaded into context.
 
-## 2. Trace evidence
+---
 
-| Case | L1 observed | L2 loaded? | Exact L3 paths loaded | Irrelevant paths avoided | Result |
-| --- | --- | --- | --- | --- | --- |
-| A | `renewal-advisor`: Specialist guidance for enterprise software contract renewals... | Yes (`SKILL.md`) | `references/discount-policy.md` | `renewal-process.md`, `risk-escalation.md`, `renewal-brief-template.md`, `calculate_quote.py` | Identified >10%-15% discount band requiring VP Sales & Finance Business Partner approval. Cited `[Source: references/discount-policy.md]`. |
-| B | `renewal-advisor`: Specialist guidance for enterprise software contract renewals... | Yes (`SKILL.md`) | `references/renewal-process.md` | `discount-policy.md`, `risk-escalation.md`, `renewal-brief-template.md`, `calculate_quote.py` | Matched 75-day window to 90-61 day timeline requiring internal account review to identify churn risks and commercial constraints. Cited `[Source: references/renewal-process.md]`. |
-| C | `renewal-advisor`: Specialist guidance for enterprise software contract renewals... | Yes (`SKILL.md`) | `references/discount-policy.md`, `references/renewal-process.md`, `references/risk-escalation.md` | `renewal-brief-template.md`, `calculate_quote.py` | Cross-resource routing: 18% discount -> CRO & Finance Director; 10 days & high churn -> Executive sponsor & Renewal Desk; Regulated & auto-renewal removal -> Legal & Security. |
-| D | `renewal-advisor`: Specialist guidance for enterprise software contract renewals... | Yes (`SKILL.md`) | `assets/renewal-brief-template.md`, `references/discount-policy.md`, `references/renewal-process.md`, `references/risk-escalation.md` | `calculate_quote.py` | Populated official renewal brief template accurately using policy rules. Maintained clear status labels (**requested**, **routed**). |
-| E | `renewal-advisor`: Specialist guidance for enterprise software contract renewals... | Yes (`SKILL.md`) | `scripts/calculate_quote.py`, `references/discount-policy.md` | `renewal-process.md`, `risk-escalation.md`, `renewal-brief-template.md` | Executed `calculate_quote.py --arr 92000 --discount-percent 12` returning `$11,040.00` discount and `$80,960.00` net ARR; identified VP Sales & Finance BP approval. |
-| F | `renewal-advisor`: Specialist guidance for enterprise software contract renewals... | Yes (`SKILL.md`) | `references/risk-escalation.md` | `discount-policy.md`, `renewal-process.md`, `renewal-brief-template.md`, `calculate_quote.py` | Recognized request as unsupported by policy sources; refused to invent SOC 2 control ID or 24-hr recovery promise; routed to Legal & Service Reliability. |
+# Final trace evidence
 
-## 3. Evaluation scores
+## Case A
+- Predicted L3: `references/discount-policy.md`
+- Observed L1: `renewal-advisor`: Specialist guidance for enterprise software contract renewals, discount approval routing, renewal process timing, risk escalations, official renewal briefs, and deterministic quote calculations. Excludes general technical product troubleshooting.
+- Observed L2: `SKILL.md` loaded successfully.
+- Observed L3: `references/discount-policy.md`
+- Final result: Identified >10%-15% discount band requiring VP Sales & Finance Business Partner approval. Cited `[Source: references/discount-policy.md]`.
+- Unnecessary resources loaded: None (`references/renewal-process.md`, `references/risk-escalation.md`, `assets/renewal-brief-template.md`, and `scripts/calculate_quote.py` were correctly avoided).
 
-Score each item 0 or 1.
+## Case B
+- Predicted L3: `references/renewal-process.md`
+- Observed L1: `renewal-advisor`: Specialist guidance for enterprise software contract renewals, discount approval routing, renewal process timing, risk escalations, official renewal briefs, and deterministic quote calculations. Excludes general technical product troubleshooting.
+- Observed L2: `SKILL.md` loaded successfully.
+- Observed L3: `references/renewal-process.md`
+- Final result: Matched 75-day window to 90-61 day timeline requiring internal account review to identify churn risks and commercial constraints. Cited `[Source: references/renewal-process.md]`.
+- Unnecessary resources loaded: None (`references/discount-policy.md`, `references/risk-escalation.md`, `assets/renewal-brief-template.md`, and `scripts/calculate_quote.py` were correctly avoided).
 
-| Eval ID | Selection | Minimum resources | Correct facts | Citation | Safe handling | Total /5 |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| L1-01 | 1 | 1 | 1 | 1 | 1 | 5/5 |
-| L3-01 | 1 | 1 | 1 | 1 | 1 | 5/5 |
-| L3-02 | 1 | 1 | 1 | 1 | 1 | 5/5 |
-| L3-03 | 1 | 1 | 1 | 1 | 1 | 5/5 |
-| L3-04 | 1 | 1 | 1 | 1 | 1 | 5/5 |
-| SAFE-01 | 1 | 1 | 1 | 1 | 1 | 5/5 |
+## Case C
+- Predicted L3: `references/discount-policy.md`, `references/renewal-process.md`, `references/risk-escalation.md`
+- Observed L1: `renewal-advisor`: Specialist guidance for enterprise software contract renewals, discount approval routing, renewal process timing, risk escalations, official renewal briefs, and deterministic quote calculations. Excludes general technical product troubleshooting.
+- Observed L2: `SKILL.md` loaded successfully.
+- Observed L3: `references/discount-policy.md`, `references/renewal-process.md`, `references/risk-escalation.md`
+- Final result: Cross-resource routing: 18% discount -> CRO & Finance Director; 10 days & high churn -> Executive sponsor & Renewal Desk; Regulated & auto-renewal removal -> Legal & Security.
+- Unnecessary resources loaded: None (`assets/renewal-brief-template.md` and `scripts/calculate_quote.py` were correctly avoided).
 
-## 4. Reflection
+## Case D
+- Predicted L3: `assets/renewal-brief-template.md`, `references/discount-policy.md`, `references/renewal-process.md`, `references/risk-escalation.md`
+- Observed L1: `renewal-advisor`: Specialist guidance for enterprise software contract renewals, discount approval routing, renewal process timing, risk escalations, official renewal briefs, and deterministic quote calculations. Excludes general technical product troubleshooting.
+- Observed L2: `SKILL.md` loaded successfully.
+- Observed L3: `assets/renewal-brief-template.md`, `references/discount-policy.md`, `references/renewal-process.md`, `references/risk-escalation.md`
+- Final result: Populated official renewal brief template accurately using policy rules. Maintained clear status labels (**requested**, **routed**).
+- Unnecessary resources loaded: None (`scripts/calculate_quote.py` avoided since dollar math was not explicitly requested).
 
-### Why is policy detail stored at L3 instead of L1?
+## Case E
+- Predicted L3: `scripts/calculate_quote.py`, `references/discount-policy.md`
+- Observed L1: `renewal-advisor`: Specialist guidance for enterprise software contract renewals, discount approval routing, renewal process timing, risk escalations, official renewal briefs, and deterministic quote calculations. Excludes general technical product troubleshooting.
+- Observed L2: `SKILL.md` loaded successfully.
+- Observed L3: `scripts/calculate_quote.py`, `references/discount-policy.md`
+- Final result: Executed `calculate_quote.py --arr 92000 --discount-percent 12` returning `$11,040.00` discount and `$80,960.00` net ARR; identified VP Sales & Finance BP approval.
+- Unnecessary resources loaded: None (`references/renewal-process.md`, `references/risk-escalation.md`, `assets/renewal-brief-template.md` were correctly avoided).
 
-> L1 metadata is included in the agent prompt on every interaction to determine skill relevance. Storing detailed policy rules at L1 consumes excessive tokens, increases latency and API costs, pollutes the context window, and increases the risk of hallucinations. Storing policy detail at L3 enables progressive disclosure, loading precise documentation into context only when required by the specific task.
+## Case F
+- Predicted L3: `references/risk-escalation.md`
+- Observed L1: `renewal-advisor`: Specialist guidance for enterprise software contract renewals, discount approval routing, renewal process timing, risk escalations, official renewal briefs, and deterministic quote calculations. Excludes general technical product troubleshooting.
+- Observed L2: `SKILL.md` loaded successfully.
+- Observed L3: `references/risk-escalation.md`
+- Final result: Recognized request as unsupported by policy sources; refused to invent SOC 2 control ID or 24-hr recovery promise; routed to Legal & Service Reliability.
+- Unnecessary resources loaded: None (`references/discount-policy.md`, `references/renewal-process.md`, `assets/renewal-brief-template.md`, `scripts/calculate_quote.py` were correctly avoided).
 
-### What is the difference between a skill and a tool in this lab?
+---
 
-> A **skill** (defined in `SKILL.md`) is a reusable package of domain-specific instructions, procedures, workflow rules, and resource maps that teaches the agent how to analyze queries and locate policy evidence. A **tool** (such as `SkillToolset` or local script execution) is a programmatic interface that gives the agent the mechanical capability to execute code (`calculate_quote.py`), load files, or perform actions.
+# What I learned
 
-### Give one example where loading fewer resources improves the agent.
+## Skill vs resource
+A **skill** (defined in `SKILL.md`) is a reusable package of domain-specific instructions, procedures, workflow rules, and resource maps that teaches the agent how to analyze queries and locate policy evidence. A **resource** (such as files in `references/`, `assets/`, or `scripts/`) contains the ground-truth detailed facts or executable code loaded dynamically by the skill only when required.
 
-> When answering a simple discount approval question ("What approval is needed for a 12% discount?"), loading only `references/discount-policy.md` keeps the context concise and focused. If the agent also loaded `renewal-process.md` and `risk-escalation.md`, the extraneous information (such as 120-day timeline actions or SOC 2 escalation workflows) could distract the model, increase processing time, or lead to unnecessary extraneous commentary.
+## L1 → L2 → L3 progressive disclosure
+Progressive disclosure structures information into three tiers:
+1. **L1 Metadata**: Compact YAML frontmatter loaded into prompt context for initial skill discovery.
+2. **L2 Instructions**: Detailed procedure and resource routing map loaded when the skill is selected.
+3. **L3 Resources**: Target evidence files or executable scripts loaded on-demand for specific questions.
 
-### What failure could occur if `SKILL.md` names resources vaguely instead of using exact paths?
+## Why minimum-resource loading matters
+Loading only the minimum necessary L3 files keeps the model's context window clean and focused, reduces token consumption and API cost, speeds up model inference, and eliminates hallucinations or interference caused by irrelevant policy rules.
 
-> If `SKILL.md` uses vague resource names (e.g. "check the discount document"), the LLM must attempt to guess file paths (leading to failed file reads/404 errors) or default to hallucinating policy numbers from its internal pre-training. Specifying exact relative paths (`references/discount-policy.md`) guarantees deterministic, single-attempt resource retrieval.
+## Why deterministic math belongs in a script
+LLMs perform arithmetic probabilistically and can make calculation errors on complex monetary amounts. Offloading financial math to a deterministic Python script (`calculate_quote.py`) guarantees 100% precision and auditability.
 
-## 5. Test output
-
-```text
-.......                                                                  [100%]
-7 passed in 0.03s
-```
+## Why safe abstention can be a correct answer
+When queried for facts outside the provided policies (such as ungrounded SOC 2 control IDs or 24-hour RTO guarantees), refusing to hallucinate and correctly routing the query to human authorities (Legal, Security, Reliability) preserves system safety, trust, and compliance integrity.

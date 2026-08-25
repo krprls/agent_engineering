@@ -1,6 +1,6 @@
 ---
 name: renewal-advisor
-description: Specialist guidance for enterprise software contract renewals, discount approval routing, renewal process timelines, risk escalations, renewal briefs, and quote calculations.
+description: Specialist guidance for enterprise software contract renewals, discount approval routing, renewal process timing, risk escalations, official renewal briefs, and deterministic quote calculations. Excludes general technical product troubleshooting.
 ---
 
 # Renewal Advisor
@@ -34,12 +34,12 @@ To evaluate renewal requests accurately, gather the following input details:
 - **Churn Risk**: Risk classification (Low, Medium, High).
 - **Special Terms / Requests**: Non-standard legal, compliance, or commercial requests (e.g., auto-renewal removal).
 
-If required inputs for policy evaluation or calculation are missing, ask the user to provide them before proceeding.
+If required inputs for policy evaluation or calculation are missing, ask the user to provide them for missing input handling before proceeding.
 
 ## Procedure
 
 1. **Inspect Request Inputs**: Check if the user prompt provides necessary details (ARR, discount %, timing, churn risk, special terms). Prompt the user if essential details are missing.
-2. **Selective Resource Loading**: Determine the minimum L3 resource(s) required to answer the query:
+2. **Selective Resource Loading**: Apply minimum resource loading to determine the minimum L3 resource(s) required to answer the query:
    - For discount thresholds and approvers: load `references/discount-policy.md`.
    - For timeline actions and commercial rules: load `references/renewal-process.md`.
    - For risk escalation, regulated status, or auto-renewal removal: load `references/risk-escalation.md`.
@@ -48,7 +48,7 @@ If required inputs for policy evaluation or calculation are missing, ask the use
 3. **Execute Quote Calculator**: When requested to calculate net ARR or dollar discount, run `scripts/calculate_quote.py --arr <ARR> --discount-percent <DISCOUNT>` using local code execution. Never calculate discount math manually.
 4. **Apply Policy & Status Rules**: Ground every conclusion in loaded L3 resources. Maintain strict status distinction using **requested**, **routed**, or **approved**. Never collapse "requested" or "routed" into "approved".
 5. **Format Response & Citations**: Present a concise, structured response. Cite every policy rule using its exact relative file path, e.g., `[Source: references/discount-policy.md]`.
-6. **Handle Unsupported Requests**: If an answer or control ID is not present in the supplied resources, state clearly that the provided sources do not support it and provide the appropriate escalation route.
+6. **Handle Unsupported Questions**: If an answer or control ID is not present in the supplied resources, state clearly that the provided sources do not support it for unsupported questions and provide the appropriate escalation route.
 
 ## Resource routing map
 
@@ -64,18 +64,18 @@ Map each query type to the exact minimum L3 resource path required:
 
 ## Minimum-resource rule
 
-Load only the minimum L3 resources strictly required for the immediate query. Avoid loading unnecessary files. For single-topic questions (e.g., only discount approval), load only the corresponding single reference file.
+Enforce minimum resource loading: load only the minimum L3 resources strictly required for the immediate query. Avoid loading unnecessary files. For single-topic questions (e.g., only discount approval), load only the corresponding single reference file.
 
 ## Output contract
 
-- **Citations**: Append the relative path source citation `[Source: relative/path.md]` to all factual policy assertions.
+- **Citations**: Append the relative path source citation `[Source: relative/path.md]` to cite all factual policy assertions.
 - **Status Terminology**: Standardize status updates to **requested**, **routed**, or **approved**.
-- **No Unapproved Commitments**: Do not describe any requested discount or contract term change as approved until explicit confirmation from all designated approvers is established.
+- **No Unapproved Commitments**: Do not describe any requested discount or contract term change as approved until explicit confirmation from all designated authorities is established.
 
 ## Unsupported and missing-source behavior
 
 If asked for information not present in the L3 resources (such as specific SOC 2 control IDs, 24-hour recovery time promises, or non-existent policy exceptions):
-- State explicitly that the supplied sources do not support the request.
+- State explicitly that the supplied sources do not support the request for unsupported questions.
 - Escalate to the appropriate department (e.g., Security, Legal, Service Reliability, or Policy Owner) per `references/risk-escalation.md`.
 - Never fabricate, guess, or assume missing control IDs, approval authorities, or policy rules.
 
@@ -94,4 +94,4 @@ If asked for information not present in the L3 resources (such as specific SOC 2
 ### Ambiguous
 
 **Prompt**: "A customer asked for a renewal discount. What should I do?"  
-**Behavior**: Ask the CSM to provide the renewal ARR and the requested discount percentage so the exact approval band and required approvers can be determined from policy.
+**Behavior**: Handle missing input details: Ask the CSM to provide the renewal ARR and the requested discount percentage so the exact approval band and required approvers can be determined from policy.
