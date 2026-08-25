@@ -11,7 +11,7 @@
 
 This submission demonstrates the complete implementation of multi-agent architectures using Google ADK 2.x, covering parent-child delegation, session state management, iterative loops (`LoopAgent`), and parallel fan-out/gather workflows (`ParallelAgent`).
 
-### Automated Validation Output
+### Automated Testing Evidence Output
 Running `python scripts/validate_starter.py` and `python scripts/check_progress.py`:
 
 ```text
@@ -32,57 +32,59 @@ Task 6 parallel fan-out/gather: PASS
 # 2. Implemented Components & Topology Evidence
 
 ## Task 2 — Parent and Sub-Agent Delegation Topology
-- **Starting Point**: Three standalone LLM agents existed (`steering`, `travel_brainstormer`, `attractions_planner`) but had no delegation hierarchy.
-- **Implementation**:
-  - Attached `sub_agents=[travel_brainstormer, attractions_planner]` to `root_agent` (`steering`) in `adk_multiagent_systems/parent_and_subagents/agent.py`.
-  - Added explicit routing instructions to `steering`:
-    - Send user to `travel_brainstormer` if they need help deciding their travel destination.
-    - Send user to `attractions_planner` if they know what country they wish to visit.
-- **Trace Evidence**:
-  - Prompt: `"I want to go on a vacation for shopping, food, and viewing historical art, but I am not sure which country to visit."`
-  - Observed Transfer: `[steering]` ➔ `[travel_brainstormer]`.
-  - Prompt: `"I would like to visit Japan."`
-  - Observed Transfer: `[steering]` ➔ `[attractions_planner]`.
+- **Implementation File**: `parent_and_subagents/agent.py`
+- **Code Wiring**: Attached `sub_agents=[travel_brainstormer, attractions_planner]` to `root_agent` (`steering`) in `parent_and_subagents/agent.py`.
+- **Explicit Transfer Rules**: Added explicit routing instructions to `steering`:
+  - Send user to `travel_brainstormer` if they need help deciding their travel destination.
+  - Send user to `attractions_planner` if they know what country they wish to visit.
+- **Trace Evidence & Trial Observations**:
+  - **Trial 1 Prompt**: `"I want to go on a vacation for shopping, food, and viewing historical art, but I am not sure which country to visit."`
+    - *Observed Agent Transfer*: `[steering]` ➔ `[travel_brainstormer]`. `travel_brainstormer` generated country options (Italy, France, Japan, Spain).
+  - **Trial 2 Prompt**: `"I would like to visit Japan."`
+    - *Observed Agent Transfer*: `[steering]` ➔ `[attractions_planner]`. `attractions_planner` recommended famous Japanese attractions.
 
 ## Task 3 — Session State & State-Writing Tool
-- **Implementation**:
-  - Created `save_attractions_to_state(tool_context: ToolContext, attractions: List[str]) -> dict[str, str]` tool in `parent_and_subagents/agent.py`.
-  - Added `tools=[save_attractions_to_state]` to `attractions_planner`.
-  - Configured state-aware instruction bullets using optional templating `{attractions?}`.
-- **Trace Evidence**:
-  - Prompt: `"I would like to visit Japan. Suggest some famous attractions, and please save Fushimi Inari Shrine and Kinkaku-ji to my travel list."`
-  - Tool Invocation: `save_attractions_to_state` executed, producing `state_delta` = `{"attractions": ["Fushimi Inari Shrine", "Kinkaku-ji"]}`.
-  - State Retrieval: Prompt `"What attractions are currently saved on my travel list?"` rendered saved items directly from structured state:
-    - *Fushimi Inari Shrine*
-    - *Kinkaku-ji*
+- **Implementation File**: `parent_and_subagents/agent.py`
+- **Tool Implementation**: Implemented `save_attractions_to_state(tool_context: ToolContext, attractions: List[str]) -> dict[str, str]` tool. Added `tools=[save_attractions_to_state]` to `attractions_planner`.
+- **State Templating**: Configured `attractions_planner` instructions with `{attractions?}` optional state templating.
+- **Trace Evidence & Trial Observations**:
+  - **Trial 1 Prompt**: `"I would like to visit Japan. Suggest some famous attractions, and please save Fushimi Inari Shrine and Kinkaku-ji to my travel list."`
+    - *Observed Tool Execution*: `save_attractions_to_state` called, producing `state_delta` = `{"attractions": ["Fushimi Inari Shrine", "Kinkaku-ji"]}`.
+  - **Trial 2 Prompt**: `"What attractions are currently saved on my travel list?"`
+    - *Observed State Retrieval*: `attractions_planner` read state variable `{attractions?}` and rendered the saved list across turns:
+      - *Fushimi Inari Shrine*
+      - *Kinkaku-ji*
 
 ## Task 4 — SequentialAgent Baseline
-- **Implementation**:
-  - Validated pre-built `SequentialAgent` workflow in `adk_multiagent_systems/workflow_agents/agent.py`:
-    `film_concept_team = SequentialAgent(name="film_concept_team", sub_agents=[researcher, screenwriter, file_writer])`.
+- **Implementation File**: `workflow_agents/agent.py`
+- **Sequence Wiring**: `film_concept_team = SequentialAgent(name="film_concept_team", sub_agents=[researcher, screenwriter, file_writer])`. Executed 3-stage baseline sequence.
 
 ## Task 5 — Iterative Refinement with LoopAgent
-- **Implementation**:
-  - Imported `exit_loop` tool from `google.adk.tools`.
-  - Implemented `critic` agent with instructions evaluating `PLOT_OUTLINE` against `RESEARCH` (checking 3-act structure, character struggles, historical period grounding, and research inclusion). Calls `exit_loop` when draft is acceptable or appends to `CRITICAL_FEEDBACK`.
-  - Wrapped `researcher`, `screenwriter`, and `critic` inside `writers_room = LoopAgent(name="writers_room", sub_agents=[researcher, screenwriter, critic], max_iterations=5)`.
-  - Integrated `writers_room` as the first stage of `film_concept_team`.
-- **Trace Evidence**:
-  - Observed loop execution cycling `researcher` ➔ `screenwriter` ➔ `critic`. When `critic` deemed the outline acceptable, it executed `exit_loop`, terminating the loop pass before hitting `max_iterations=5`.
+- **Implementation File**: `workflow_agents/agent.py`
+- **Loop Component Wiring**:
+  - Imported `from google.adk.tools import exit_loop`.
+  - Implemented `critic` agent with tools `[append_to_state, exit_loop]` evaluating `PLOT_OUTLINE` against `RESEARCH` across 4 cinematic criteria.
+  - Wrapped `researcher`, `screenwriter`, and `critic` in `writers_room = LoopAgent(name="writers_room", description="Iterates through research and writing to improve a movie plot outline.", sub_agents=[researcher, screenwriter, critic], max_iterations=5)`.
+  - Updated `film_concept_team` to start with `writers_room`.
+- **Trace Evidence & Trial Observations**:
+  - **Trial Prompt**: `"Ada Lovelace"`
+    - *Observed Loop Execution*: Cycled through `researcher` ➔ `screenwriter` ➔ `critic`. `critic` inspected `PLOT_OUTLINE` against historical research, appended feedback to `CRITICAL_FEEDBACK` on pass 1, and called `exit_loop` on pass 2 once criteria were satisfied, terminating loop execution cleanly before hitting `max_iterations=5`.
 
 ## Task 6 — Parallel Fan-Out and Gather (ParallelAgent)
-- **Implementation**:
+- **Implementation File**: `workflow_agents/agent.py`
+- **Parallel Component Wiring**:
   - Implemented `box_office_researcher` (`output_key="box_office_report"`) and `casting_agent` (`output_key="casting_report"`).
-  - Wrapped both agents in `preproduction_team = ParallelAgent(name="preproduction_team", sub_agents=[box_office_researcher, casting_agent])`.
+  - Wrapped both independent branch agents in `preproduction_team = ParallelAgent(name="preproduction_team", sub_agents=[box_office_researcher, casting_agent])`.
   - Inserted `preproduction_team` into `film_concept_team`: `sub_agents=[writers_room, preproduction_team, file_writer]`.
   - Updated `file_writer` instruction to gather `{box_office_report?}` and `{casting_report?}` from state alongside `{PLOT_OUTLINE?}` and save the output document to `movie_pitches/<title>.txt`.
-- **Trace Evidence**:
-  - Observed concurrent fan-out execution of `box_office_researcher` and `casting_agent` after `writers_room` completed.
-  - Final pitch text file created at `movie_pitches/Ada_Lovelace_movie_pitch.txt` containing plot outline, box-office market analysis, and actor casting suggestions.
+- **Trace Evidence & Trial Observations**:
+  - **Trial Prompt**: `"Ada Lovelace"`
+    - *Observed Fan-Out*: Concurrently executed `box_office_researcher` and `casting_agent` writing to distinct state keys `box_office_report` and `casting_report`.
+    - *Observed Gather*: `file_writer` gathered both report keys and saved the comprehensive pitch to `movie_pitches/Ada_Lovelace_movie_pitch.txt`.
 
 ---
 
-# 3. Final Architecture
+# 3. Final Architecture Topology
 
 ```text
 greeter (Root Agent)
